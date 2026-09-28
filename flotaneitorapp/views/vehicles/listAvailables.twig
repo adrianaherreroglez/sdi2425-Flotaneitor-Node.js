@@ -1,0 +1,53 @@
+{% extends "layout.twig" %}
+
+{% block title %} Vehículos disponibles{% endblock %}
+
+{% block main_container %}
+    <h2>Vehículos disponibles</h2>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Matrícula</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Odómetro actual</th>
+                <th class="col-md-2">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for vehicle in vehicles %}
+                <tr>
+                    <td>{{ vehicle.plate }}</td>
+                    <td>{{ vehicle.brand }}</td>
+                    <td>{{ vehicle.model }}</td>
+                    <td>{{ vehicle.kilometers }}</td>
+                    <td>
+                        <div class="d-flex justify-content-end gap-4">
+                            <form method="GET" action="/vehicles/trips/{{ vehicle.plate }}" class="m-0 p-0">
+                                <button type="submit" class="btn btn-primary">Ver trayectos</button>
+                            </form>
+                            <form method="GET" action="/refuels/{{ vehicle.plate }}" class="m-0 p-0">
+                                <button type="submit" class="btn btn-warning">Ver repostajes</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- Paginación mostrar la actual y 2 anteriores y dos siguientes -->
+    <div class="row text-center">
+        <ul class="pagination">
+            {%  for page in pages %}
+                <li class="page-item" id="pi-{{ page }}">
+                    <a class="page-link" href="/vehicles/available?page={{ page }}">{{ page }}</a>
+                </li>
+            {% endfor %}
+            <script>
+                $("#pi-"+"{{ currentPage }}").addClass("active");
+            </script>
+        </ul>
+    </div>
+{% endblock %}

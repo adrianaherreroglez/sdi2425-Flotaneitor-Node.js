@@ -1,0 +1,66 @@
+{% extends "layout.twig" %}
+{% block title %} Registro de logs {% endblock %}
+
+{% block main_container %}
+    <h2>Logger</h2>
+    <div class="row">
+        <div id="custom-search-input" class="col">
+            <form id="filterForm" method="get" action="/log/list" class="input-group align-items-center">
+                <label>
+                    <select class="form-control" name="search" id="logTypeSelect">
+                        <option value="" {% if app.request.query.get('search') == '' %}selected{% endif %}>Todos</option>
+                        <option value="PET" {% if app.request.query.get('search') == 'PET' %}selected{% endif %}>PET</option>
+                        <option value="ALTA" {% if app.request.query.get('search') == 'ALTA' %}selected{% endif %}>ALTA</option>
+                        <option value="LOGIN-EX" {% if app.request.query.get('search') == 'LOGIN-EX' %}selected{% endif %}>LOGIN-EX</option>
+                        <option value="LOGIN-ERR" {% if app.request.query.get('search') == 'LOGIN-ERR' %}selected{% endif %}>LOGIN-ERR</option>
+                        <option value="LOGOUT" {% if app.request.query.get('search') == 'LOGOUT' %}selected{% endif %}>LOGOUT</option>
+                    </select>
+                </label>
+            </form>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 15px;">
+        <div class="col">
+            <button class="btn btn-danger" onclick="deleteFilteredLogs()">Eliminar logs filtrados</button>
+        </div>
+    </div>
+    <div class="table-responsive overflow-hidden">
+        <table class="table table-hover" id="tableLogs">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Contenido</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for log in logList %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ log.type }}</td>
+                    <td>{{ log.date }}</td>
+                    <td>{{ log.content }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const select = document.getElementById('logTypeSelect');
+
+            // Rellenar desde localStorage si existe
+            const saved = localStorage.getItem('logFilter');
+            if (saved !== null) {
+                select.value = saved;
+            }
+
+            select.addEventListener('change', function () {
+                localStorage.setItem('logFilter', select.value);
+                document.getElementById('filterForm').submit();
+            });
+        });
+    </script>
+
+{% endblock %}

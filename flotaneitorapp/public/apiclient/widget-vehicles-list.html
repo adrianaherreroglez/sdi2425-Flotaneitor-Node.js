@@ -1,0 +1,163 @@
+<div id="widget-vehicles" class="container mt-4">
+    <div id="vehicles-list-messages">
+    </div>
+    <h2 class="mb-4 text-primary">Vehículos Disponibles</h2>
+
+    <div id="vehicle-list" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <!-- Aquí se insertarán los vehículos dinámicamente -->
+
+    </div>
+</div>
+<script>
+    (function () {
+        window.history.pushState("", "", "/apiclient/client.html?w=vehiclesList");
+
+        /**
+         * Muestra los vehículos libres y que están disponibles para iniciar un trayecto.
+         * Para ello hace una petición GET al endpoint /vehicles utilizando el token de autenticación.
+         */
+        function loadVehicles() {
+            $.ajax({
+                url: URLbase + "/vehicles",
+                type: "GET",
+                data: {},
+                dataType: 'json',
+                headers: {"token": token},
+                success: function (response) {
+                    const vehicles = response.vehicles;
+                    updateVehiclesList(vehicles)
+                },
+                error: function (error) {
+                    const errorsDiv = $('#vehicles-list-messages')
+                    // Se obtiene el error
+                    let err = error.responseJSON.error;
+                    // Se vacía la lista de errores y se añade el error
+                    errorsDiv.empty().append(`
+                    <div class="alert alert-danger" role="alert">
+                        <p>${err}</p>
+                    </div>
+                `)
+                }
+            })
+        }
+
+        /**
+         * Muestra los vehículos en la vista por medio de tarjetas con la información de cada uno
+         * @param vehicles lista de los vehículos a mostrar
+         */
+        function updateVehiclesList(vehicles) {
+            const vehiclesDiv = $("#vehicle-list");
+            // Vaciar la lista de vehículos antes de insertarlos de nuevo
+            vehiclesDiv.empty()
+            if (vehicles.length === 0) {
+                vehiclesDiv.append(`<div class="col">
+                    <div class="alert alert-info" role="alert">
+                        No hay vehículos disponibles en este momento.
+                    </div>
+                </div>`)
+            } else {
+                vehicles.forEach(vehicle => {
+                    vehiclesDiv.append(`
+                <div class="col-sm-6 col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">${vehicle.brand} ${vehicle.model}</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p><strong>Matrícula:</strong> ${vehicle.plate}</p>
+                            <p><strong>Nº Chasis:</strong> ${vehicle.chassisNumber}</p>
+                            <p><strong>Combustible:</strong> ${vehicle.fuelType}</p>
+                            <p><strong>Kilómetros:</strong> ${vehicle.kilometers.toLocaleString()} km</p>
+                            <button onclick="startTrip('${vehicle._id}')" class="btn btn-primary">
+                              <span class="glyphicon glyphicon-road" aria-hidden="true"></span> Comenzar Trayecto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `)
+                })
+            }
+        }
+
+        loadVehicles()
+    })();
+
+    /**
+     * Inicia un trayecto en el vehículo cuya matrícula es introducida como parámetro
+     * @param vehicleId vehículo a usar en el nuevo trayecto
+     */
+    async function startTrip(vehicleId) {
+        // Obtenemos el vehículo a partir del id
+        const vehicle = await getVehicleById(vehicleId)
+
+        // Si no se ha conseguido el vehículo es que ha dado error
+        if (vehicle == null)
+            return;
+
+        // Iniciamos el trayecto
+        await $.ajax({
+            url: URLbase + "/trips/start",
+            type: "POST",
+            data: {
+                plate: vehicle.plate
+            },
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (response) {
+                // Almacenamos en la variable de información compartida el vehículo
+                appState.tripSelectedVehicle = vehicle
+                $("#main-container").load("widget-vehicle-trips.html", function () {
+                    // Se muestra el mensaje de información de trayecto iniciado
+                    $("#vehicle-trips-list-messages").empty().append(`
+                    <div class="alert alert-success" role="alert">
+                        ${response.msg}
+                    </div>
+                `)
+                });
+            },
+            error: function (error) {
+                const errorsDiv = $('#vehicles-list-messages')
+                // Se obtiene el error
+                let err = error.responseJSON.error;
+                // Se vacía la lista de errores y se añade el error
+                errorsDiv.empty().append(`
+                    <div class="alert alert-danger" role="alert">
+                        <p>${err}</p>
+                    </div>
+                `)
+            }
+        })
+
+        /**
+         * Obtiene el vehículo cuyo id es recibido como parámetro
+         * @param vehicleId id del vehículo a devolver
+         * @returns {Promise<*>} promesa que puede contener o no el vehículo cuyo id es recibido como parámetro
+         */
+        async function getVehicleById(vehicleId) {
+            let vehicle
+            // Recuperamos el objeto vehicle
+            await $.ajax({
+                url: URLbase + "/vehicle/" + vehicleId,
+                type: "GET",
+                data: {},
+                dataType: 'json',
+                headers: {"token": token},
+                success: function (response) {
+                    vehicle = response.vehicle;
+                },
+                // Si no se encuentra el vehículo, se muestra un error genérico y se hace console.error con el fallo
+                error: function (error) {
+                    let err = error.responseJSON.error;
+                    console.error(err)
+                    const errorsDiv = $('#vehicles-list-messages')
+                    errorsDiv.empty().append(`
+                    <div class="alert alert-danger" role="alert">
+                        <p>Ha ocurrido un error al intentar iniciar el trayecto</p>
+                    </div>
+                `)
+                }
+            })
+            return vehicle
+        }
+    }
+</script>

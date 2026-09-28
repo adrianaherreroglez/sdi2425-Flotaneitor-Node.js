@@ -1,0 +1,63 @@
+{% extends "layout.twig" %}
+{% block title  %} Registrar repostaje {% endblock %}
+{% block main_container %}
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+    <h2> Registrar repostaje</h2>
+    <form class="form-horizontal" method="post" action="/refuels/add">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="stationName">Nombre de la estación</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="stationName" name="stationName" placeholder="Repostata"
+                       value="{{ formData.stationName }}"/>
+            </div>
+        </div>
+        <br>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="pricePerUnit">Precio por unidad: </label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="pricePerUnit" name="pricePerUnit"
+                       placeholder="Precio por unidad" value="{{ formData.pricePerUnit }}" step="0.01"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="quantity">Cantidad repostada: </label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="quantity" name="quantity"
+                       placeholder="Cantidad repostada" value="{{ formData.quantity }}" step="0.01"/>
+            </div>
+        </div>
+        <br>
+        <div class="form-group">
+            <div class="col-sm-4 d-flex justify-content-around align-items-left">
+                <label class="control-label" for="isTankFull">El tanque se ha rellenado por completo</label>
+                <input type="checkbox" class="form-control-input" id="isTankFull" name="isTankFull">
+            </div>
+        </div>
+        <br>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="odometerRefuelValue">Valor del odométro: </label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="odometerRefuelValue" name="odometerRefuelValue"
+                       placeholder="Valor del odometro" value="{{ formData.odometerRefuelValue }}" step="0.01"/>
+            </div>
+        </div>
+        <br>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="observations">Observaciones: </label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="observations" name="observations"
+                       placeholder="Observaciones" value="{{ formData.observations }}"/>
+            </div>
+        </div>
+        <br>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

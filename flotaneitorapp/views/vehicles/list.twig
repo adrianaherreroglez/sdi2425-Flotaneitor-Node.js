@@ -1,0 +1,79 @@
+{% extends "layout.twig" %}
+{% block title %} Vehículos {% endblock %}
+{% block main_container %}
+    {% if errorMessage %}
+        <div class="alert alert-danger">
+            {{ errorMessage }}
+        </div>
+    {% endif %}
+    <h2>Vehículos</h2>
+    <!-- Agregar Vehículo -->
+    <form method="POST" action="/vehicles/delete">
+        {% if user.role == 'admin' %}
+            <div class="row text-right">
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+            </div>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    {% if user.role == 'admin' %}
+                        <th>Seleccionar</th>
+                    {% endif %}
+                    <th>Matrícula</th>
+                    <th>Nº de bastidor</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Tipo de combustible</th>
+                    <th>Kilometraje</th>
+                    <th>Estado</th>
+                    <th class="col-md-1"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for vehicle in vehicles %}
+                    <tr>
+                        {% if user.role == 'admin' %}
+                            <td>
+                                <label class="control-label col-sm-2" for="vehicleIds"></label>
+                                <input type="checkbox" id="vehicleIds" name="vehicleIds" value="{{ vehicle._id }}">
+                            </td>
+                        {% endif %}
+                        <td>{{ vehicle.plate }}</td>
+                        <td>{{ vehicle.chassisNumber }}</td>
+                        <td>{{ vehicle.brand }}</td>
+                        <td>{{ vehicle.model }}</td>
+                        <td>{{ vehicle.fuelType }}</td>
+                        <td>{{ vehicle.kilometers }}</td>
+                        <td>{{ vehicle.state }}</td>
+                        {% if user.role == 'employee' %}
+                            <td>
+                                <a href="/refuels/{{ vehicle.plate }}">Repostajes</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% if user.role == 'admin' %}
+        <div class="row text-right">
+            <a href="/vehicles/add" class="btn btn-info" role="button">Agregar vehículo</a>
+        </div>
+    {% endif %}
+    <!-- Paginación mostrar la actual y 2 anteriores y dos siguientes -->
+    <div class="row text-center">
+        <ul class="pagination">
+            {%  for page in pages %}
+                <li class="page-item" id="pi-{{ page }}">
+                    <a class="page-link" href="/vehicles?page={{ page }}">{{ page }}</a>
+                </li>
+            {% endfor %}
+            <script>
+                $("#pi-"+"{{ currentPage }}").addClass("active");
+            </script>
+        </ul>
+    </div>
+{% endblock %}

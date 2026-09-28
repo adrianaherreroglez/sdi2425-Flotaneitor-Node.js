@@ -1,0 +1,97 @@
+<div id="widget-user-trips" class="container mt-4">
+    <div id="user-trips-list-messages">
+    </div>
+    <h2 class="mb-4 text-primary" id="vehicle-trips-title">Mis Trayectos</h2>
+
+    <table id="user-trips-list" class="table table-striped table-bordered">
+        <!-- Aquí se insertarán los trayectos dinámicamente -->
+    </table>
+</div>
+<script>
+    (function () {
+        window.history.pushState("", "", "/apiclient/client.html?w=userTrips");
+
+        /**
+         * Recupera los trayectos del usuario en sesión y los muestra en la tabla
+         */
+        function getUserTrips () {
+            $.ajax({
+                url: URLbase + "/trips",
+                type: "GET",
+                data: {},
+                dataType: "json",
+                headers: { "token": token },
+                success: function (response) {
+                    const trips = response.trips
+                    updateUserTripsList(trips)
+                },
+                error: function (error) {
+                    const errorsDiv = $('#user-trips-list-messages');
+                    let err = error.responseJSON.error;
+                    errorsDiv.empty().append(`
+                    <div class="alert alert-danger" role="alert">
+                        <p>Ha ocurrido un error al tratar de recuperar los trayectos: ${err}</p>
+                    </div>
+                `);
+                }
+            })
+        }
+
+        function updateUserTripsList(trips) {
+            const table = $("#user-trips-list");
+            table.empty();
+
+            // Si no hay trayectos
+            if (!trips || trips.length === 0) {
+                table.append(`
+                <tr><td colspan="5" class="text-center text-muted">Actualmente no tiene trayectos realizados</td></tr>
+            `);
+                return;
+            }
+
+            // Cabecera
+            table.append(`
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Vehículo</th>
+                    <th>Inicio</th>
+                    <th>Odómetro Inicial</th>
+                    <th>Odómetro Final</th>
+                    <th>Duración</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `);
+
+            const tbody = table.find("tbody");
+
+            // Se añaden los trayectos a la tabla
+            trips.forEach((trip, index) => {
+                const start = new Date(trip.startDateTime).toLocaleString();
+                const vehicle = trip.plate ?? "<span class='text-muted'>Desconocido</span>"
+                const odoStart = trip.startingOdometer ?? "-";
+                const odoEnd = trip.endingOdometer ?? "<span class='text-muted'>En curso</span>";
+                const duration = trip.duration ?? "<span class='text-muted'>-</span>";
+                let formattedDuration = duration
+                if (trip.duration)
+                    formattedDuration = formatTripsDuration(duration)
+
+                tbody.append(`
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${vehicle}</td>
+                    <td>${start}</td>
+                    <td>${odoStart.toLocaleString()} km</td>
+                    <td>${typeof odoEnd === "string" ? odoEnd : odoEnd.toLocaleString() + " km"}</td>
+                    <td>${formattedDuration}</td>
+                </tr>
+            `);
+            });
+        }
+
+        getUserTrips()
+
+    })();
+
+</script>

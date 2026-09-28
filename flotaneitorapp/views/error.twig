@@ -1,0 +1,9 @@
+{% extends 'layout.twig' %}
+
+{% block main_container %}
+    <h2>Error {{ error.status }}</h2>
+    <p><strong>{{ message }}</strong></p>
+    {% if error.stack %}
+        <pre>{{ error.stack }}</pre>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "layout.twig" %}
+
+{% block title %}Registrar inicio de trayecto{% endblock %}
+
+{% block main_container %}
+    <h2>Registrar inicio de trayecto</h2>
+
+    <form class="form-horizontal" method="post" action="/trips/add">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="plate">Matrícula:</label>
+            <div class="col-sm-10">
+                <select class="form-control" id="plate" name="plate" required>
+                    {% for vehicle in vehicles %}
+                        <option value="{{ vehicle.plate }}" data-odometer="{{ vehicle.kilometers }}">
+                            {{ vehicle.plate }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Fecha y hora de inicio:</label>
+            <div class="col-sm-10">
+                <label>
+                    <input type="datetime-local" class="form-control" value="{{ now }}" disabled>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="odometer">Odómetro Inicial:</label>
+            <div class="col-sm-10">
+                <input type="text" id="odometer" name="odometer" class="form-control" readonly>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Registrar inicio</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        document.getElementById("plate").addEventListener("change", function() {
+            let selectedOption = this.options[this.selectedIndex];
+            let odometerValue = selectedOption.getAttribute("data-odometer");
+
+            let odometerInput = document.getElementById("odometer");
+            odometerInput.value = odometerValue;
+            odometerInput.disabled = false;
+        });
+
+        window.onload = function() {
+            var plateSelect = document.getElementById("plate");
+            plateSelect.dispatchEvent(new Event("change"));
+        };
+    </script>
+
+{% endblock %}

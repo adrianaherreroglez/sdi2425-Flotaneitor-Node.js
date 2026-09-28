@@ -1,0 +1,136 @@
+<html lang="en">
+<head>
+  <title>APIClient Flotaneitor</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script
+          src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="/javascripts/cookie.js"></script>
+</head>
+<body>
+<!-- Barra de Navegación superior -->
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <img src="/images/flotaneitorIcon.png" alt="logo"/>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav" id="barra-menu">
+        <li><a href="#" data-widget="vehiclesList">Vehículos Disponibles</a></li>
+        <li><a href="#" data-widget="vehicleTrips">Trayectos de Vehículos</a></li>
+        <li><a href="#" data-widget="userTrips">Mis Trayectos</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right" id="barra-menu-derecha">
+        <!-- Opciones de menú aqui -->
+        <li><a href="#" data-widget="logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- Contenido -->
+<div class="container" id="main-container">
+</div>
+<script>
+  window.appState = {}; // Variable para compartir información entre widgets
+  let token;
+  let URLbase = "http://localhost:8081/api/v1.0" ;
+  // Si hay token en las cookies
+  if ( Cookies.get('token') != null ){
+    token = Cookies.get('token');
+    loadWidgetFromUrl()
+  }
+  // Si no hay token en las cookies se accede al login
+  else {
+    $( "#main-container" ).load("widget-login.html");
+  }
+
+  // Hace que los botones del navbar modifiquen la url de navegación, cargando el widget correspondiente
+  $(document).on("click", "[data-widget]", function (e) {
+    e.preventDefault();
+
+    // Si no hay token, no se puede navegar fuera del login
+    if (Cookies.get('token') == null) {
+      file = "widget-login.html";
+    } else {
+      const widget = $(this).data("widget");
+
+      // Define qué archivo HTML cargar por cada widget
+      switch (widget) {
+        case "logout":
+          Cookies.remove('token');
+          file = "widget-login.html"
+          break;
+        case "vehiclesList":
+          file = "widget-vehicles-list.html";
+          break;
+        case "vehicleTrips":
+          file = "widget-vehicle-trips.html";
+          break;
+        case "userTrips":
+          file = "widget-user-trips.html";
+          break;
+        default:
+          file = "widget-vehicles-list.html";
+      }
+    }
+
+    // Carga el widget
+    $("#main-container").load(file);
+  });
+
+  /**
+   * Función que carga el widget correspondiente en función del parámetro de la URL.
+   * En caso de no haber parámetro en la URL, muestra el widget de la lista de vehículos
+   */
+  function loadWidgetFromUrl() {
+    const w = new URL(window.location.href).searchParams.get("w");
+    const mainContainer = $("#main-container")
+    switch (w) {
+      case "vehiclesList":
+        mainContainer.load("widget-vehicles-list.html");
+        break;
+      case "vehicleTrips":
+        mainContainer.load("widget-vehicle-trips.html");
+        break;
+      case "userTrips":
+        mainContainer.load("widget-user-trips.html");
+        break;
+      default:
+        mainContainer.load("widget-vehicles-list.html");
+    }
+  }
+  /**
+   * Función que sirve para formatear la duración de los trayectos de segundos a horas, minutos y segundos
+   * @param tripDuration duración del trayecto en segundos
+   * @returns {string} con la el formato deseado para el tiempo
+   */
+  function formatTripsDuration(tripDuration) {
+    console.log(tripDuration)
+    if (tripDuration === 0)
+      return '0s'
+
+    const hours = Math.floor(tripDuration / 3600);
+    const minutes = Math.floor((tripDuration % 3600) / 60);
+    const seconds = tripDuration % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`;
+    } else if (minutes > 0) {
+      return `${minutes}min`;
+    } else {
+      return `${seconds}s`;
+    }
+  }
+
+</script>
+</body>
+</html>
+

@@ -1,0 +1,46 @@
+{% extends "layout.twig" %}
+{% block title %} Repostajes {% endblock %}
+{% block main_container %}
+    <h2>Repostajes: {{ plate }}</h2>
+    <div class = "table-responsive">
+        <table class = "table table-hover">
+            <thead>
+            <tr>
+                <th>Fecha y hora</th>
+                <th>Odómetro</th>
+                <th>Tipo de combustible</th>
+                <th>Estación</th>
+                <th>Precio por ud.</th>
+                <th>Cantidad</th>
+                <th>Precio total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for refuel in refuels %}
+                <tr>
+                    <td>{{ refuel.date }}</td>
+                    <td>{{ refuel.odometer }}</td>
+                    <td>{{ refuel.fuelType }}</td>
+                    <td>{{ refuel.station }}</td>
+                    <td>{{ refuel.ppu }}</td>
+                    <td>{{ refuel.quantity }}</td>
+                    <td>{{ refuel.total }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row text-center">
+        <ul class="pagination">
+            {% for page in pages %}
+                <li class="page-item" id="pi-{{ page }}">
+                    <a class="page-link" href="/refuels/{{ plate }}?page={{ page }}">{{ page }}</a>
+                </li>
+            {% endfor %}
+            <script>
+                $("#pi-"+"{{ currentPage }}").addClass("active");
+            </script>
+        </ul>
+    </div>
+{% endblock %}
